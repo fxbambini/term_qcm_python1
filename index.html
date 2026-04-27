@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QCM Python — Terminale (TP1 + TP2)</title>
+<style>
+  :root {
+    --bg: #f7f6f1;
+    --surface: #ffffff;
+    --border: #e2e0d6;
+    --text: #2c2c2a;
+    --muted: #6b6a64;
+    --accent: #534ab7;
+    --accent-light: #eeedfe;
+    --success: #0f6e56;
+    --success-light: #e1f5ee;
+    --error: #a32d2d;
+    --error-light: #fcebeb;
+    --code-bg: #f1efe8;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 24px 16px;
+    line-height: 1.6;
+  }
+  .container {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+  header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  h1 {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0 0 4px;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 14px;
+    margin: 0;
+  }
+  .progress-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .progress-text {
+    font-size: 13px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .progress-bar {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.3s ease;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    margin-bottom: 16px;
+  }
+  .question-meta {
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+  .question-text {
+    font-size: 16px;
+    margin: 0 0 16px;
+  }
+  .question-text code {
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 14px;
+  }
+  pre.code-block {
+    background: var(--code-bg);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin: 0 0 16px;
+    overflow-x: auto;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 13.5px;
+    line-height: 1.55;
+  }
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .option {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    font-size: 14.5px;
+  }
+  .option:hover:not(.disabled) {
+    background: var(--accent-light);
+    border-color: var(--accent);
+  }
+  .option.selected {
+    background: var(--accent-light);
+    border-color: var(--accent);
+  }
+  .option.correct {
+    background: var(--success-light);
+    border-color: var(--success);
+  }
+  .option.incorrect {
+    background: var(--error-light);
+    border-color: var(--error);
+  }
+  .option.disabled {
+    cursor: default;
+  }
+  .option input[type="radio"] {
+    margin-top: 3px;
+    accent-color: var(--accent);
+    flex-shrink: 0;
+  }
+  .option code {
+    background: rgba(0,0,0,0.06);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 13px;
+  }
+  .option-label {
+    flex: 1;
+  }
+  input[type="text"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    background: var(--surface);
+    color: var(--text);
+  }
+  input[type="text"]:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-light);
+  }
+  input[type="text"].correct {
+    border-color: var(--success);
+    background: var(--success-light);
+  }
+  input[type="text"].incorrect {
+    border-color: var(--error);
+    background: var(--error-light);
+  }
+  .actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+    gap: 10px;
+  }
+  button {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14.5px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    transition: opacity 0.15s, background 0.15s;
+  }
+  button:hover:not(:disabled) {
+    opacity: 0.9;
+  }
+  button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  button.secondary {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  button.secondary:hover:not(:disabled) {
+    background: var(--code-bg);
+    opacity: 1;
+  }
+  .feedback {
+    margin-top: 16px;
+    padding: 14px 16px;
+    border-radius: 8px;
+    font-size: 14.5px;
+    display: none;
+  }
+  .feedback.correct {
+    background: var(--success-light);
+    border-left: 4px solid var(--success);
+    color: #04342c;
+  }
+  .feedback.incorrect {
+    background: var(--error-light);
+    border-left: 4px solid var(--error);
+    color: #501313;
+  }
+  .feedback strong {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+  .feedback code {
+    background: rgba(0,0,0,0.08);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 13px;
+  }
+  /* Score screen */
+  .score-card {
+    text-align: center;
+    padding: 32px 24px;
+  }
+  .score-value {
+    font-size: 48px;
+    font-weight: 600;
+    color: var(--accent);
+    margin: 12px 0 4px;
+    font-variant-numeric: tabular-nums;
+  }
+  .score-label {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  .score-comment {
+    font-size: 16px;
+    margin: 16px 0 24px;
+    font-style: italic;
+  }
+  .review-section {
+    margin-top: 24px;
+    text-align: left;
+  }
+  .review-item {
+    border-top: 1px solid var(--border);
+    padding: 16px 0;
+  }
+  .review-item:first-child {
+    border-top: none;
+  }
+  .review-q {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .review-status {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    margin-right: 8px;
+  }
+  .review-status.ok { background: var(--success-light); color: var(--success); }
+  .review-status.ko { background: var(--error-light); color: var(--error); }
+  .review-explanation {
+    font-size: 14px;
+    margin-top: 6px;
+    color: var(--muted);
+  }
+  .review-explanation code {
+    background: var(--code-bg);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 13px;
+  }
+  .section-divider {
+    text-align: center;
+    margin: 24px 0 16px;
+    font-size: 13px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 500;
+  }
+  .hidden {
+    display: none;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>QCM Python — Terminale</h1>
+    <p class="subtitle">Vérifiez vos acquis sur les TP n°1 et n°2 (fonctions, boucles, listes)</p>
+  </header>
+
+  <div id="quiz-area">
+    <div class="progress-wrap">
+      <span class="progress-text" id="progress-text">Question 1 / 14</span>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width: 7%"></div></div>
+    </div>
+
+    <div class="card" id="question-card">
+      <!-- Rempli dynamiquement -->
+    </div>
+  </div>
+
+  <div id="result-area" class="hidden">
+    <!-- Rempli à la fin -->
+  </div>
+</div>
+
+<script>
+const questions = [
+  // ===== BLOC A : Vérification TP1 + TP2 =====
+  {
+    section: "Bloc A — Vérification (TP1 + TP2)",
+    type: "qcm",
+    text: "Quel mot-clé Python permet de définir une fonction ?",
+    options: ["function", "def", "func", "define"],
+    answer: 1,
+    explanation: "Une fonction Python se déclare avec <code>def nom_fonction(arguments):</code>"
+  },
+  {
+    section: "Bloc A — Vérification (TP1 + TP2)",
+    type: "qcm",
+    text: "Quel mot-clé permet à une fonction de renvoyer un résultat ?",
+    options: ["print", "return", "yield", "out"],
+    answer: 1,
+    explanation: "<code>return</code> renvoie une valeur. <code>print</code>, lui, ne fait qu'afficher, ce n'est pas la même chose."
+  },
+  {
+    section: "Bloc A — Vérification (TP1 + TP2)",
+    type: "qcm",
+    text: "On a écrit la fonction suivante. Pour la tester avec la valeur 5, que faut-il taper dans la console Capytale ?",
+    code: "def carre(x):\n    return x * x",
+    options: ["print(carre(5))", "carre(5)", "carre = 5", "return carre(5)"],
+    answer: 1,
+    explanation: "Dans la console Capytale (ou tout environnement interactif), on tape simplement <code>carre(5)</code>. Le <code>print</code> est inutile."
+  },
+  {
+    section: "Bloc A — Vérification (TP1 + TP2)",
+    type: "code-output",
+    text: "Que renvoie l'instruction suivante ? (réponds avec la valeur exacte)",
+    code: "Nombres = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]\nNombres[0]",
+    answer: ["1"],
+    explanation: "L'indice 0 désigne le <strong>premier</strong> élément de la liste, ici <code>1</code>. En Python, on commence toujours à 0."
+  },
+  {
+    section: "Bloc A — Vérification (TP1 + TP2)",
+    type: "code-output",
+    text: "Que renvoie cette instruction ?",
+    code: "Mois = [\"janvier\", \"février\", \"mars\", \"avril\", \"mai\", \"juin\",\n        \"juillet\", \"août\", \"septembre\", \"octobre\", \"novembre\", \"décembre\"]\nMois[-1]",
+    answer: ["décembre", "'décembre'", "\"décembre\""],
+    explanation: "L'indice <code>-1</code> désigne le <strong>dernier</strong> élément de la liste, ici <code>décembre</code>."
+  },
+  {
+    section: "Bloc A — Vérification (TP1 + TP2)",
+    type: "qcm",
+    text: "Quelle méthode permet d'ajouter un élément à la fin d'une liste ?",
+    options: ["L.add(x)", "L.append(x)", "L.push(x)", "L.insert(x)"],
+    answer: 1,
+    explanation: "On utilise <code>L.append(x)</code>. Attention, c'est une méthode (avec un point), pas une fonction comme <code>append(L, x)</code>."
+  },
+  {
+    section: "Bloc A — Vérification (TP1 + TP2)",
+    type: "code-output",
+    text: "Que renvoie cette fonction quand on l'appelle avec somme(5) ? (réponds par un nombre)",
+    code: "def somme(n):\n    s = 0\n    for i in range(n):\n        s = s + i\n    return s\n\nsomme(5)",
+    answer: ["10"],
+    explanation: "<code>range(5)</code> donne <code>0, 1, 2, 3, 4</code>. La somme vaut <code>0+1+2+3+4 = 10</code>. Attention : <code>range(n)</code> ne contient <strong>pas</strong> n."
+  },
+
+  // ===== BLOC B : Vers le Bac =====
+  {
+    section: "Bloc B — Vers le Bac",
+    type: "qcm",
+    text: "Que fait la boucle suivante ?",
+    code: "L = []\nfor i in range(10):\n    L.append(2 * i)",
+    options: [
+      "Crée la liste [2, 4, 6, 8, 10, 12, 14, 16, 18, 20]",
+      "Crée la liste [0, 2, 4, 6, 8, 10, 12, 14, 16, 18]",
+      "Crée la liste [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]",
+      "Provoque une erreur"
+    ],
+    answer: 1,
+    explanation: "<code>range(10)</code> donne <code>0, 1, …, 9</code>. On ajoute <code>2*i</code> à chaque tour, donc <code>0, 2, 4, …, 18</code>."
+  },
+  {
+    section: "Bloc B — Vers le Bac",
+    type: "qcm",
+    text: "On considère la suite définie par u₀ = 1 et u_{n+1} = u_n + 7. Quelle ligne est <strong>incorrecte</strong> dans ce code ?",
+    code: "def liste_termes(n):\n    L = []\n    u = 1\n    for i in range(n):\n        L.append(u)\n        u = u + 7\n    return L",
+    options: [
+      "L = []",
+      "u = 1",
+      "L.append(u)",
+      "Aucune ligne n'est incorrecte"
+    ],
+    answer: 3,
+    explanation: "Le code est correct. <code>liste_termes(5)</code> renvoie <code>[1, 8, 15, 22, 29]</code>. C'est exactement la structure attendue : on stocke <code>u</code> avant de le mettre à jour."
+  },
+  {
+    section: "Bloc B — Vers le Bac",
+    type: "qcm",
+    text: "Cette fonction est censée renvoyer les premiers termes d'une suite, mais elle contient une erreur. Laquelle ?",
+    code: "def liste_termes(n):\n    L = []\n    u = 1\n    for i in range(n):\n        L.append(n)\n        u = u / (1 + u)\n    return L",
+    options: [
+      "L'indentation est mauvaise",
+      "Il manque un return",
+      "On ajoute n au lieu de u dans la liste",
+      "range(n) devrait être range(0, n)"
+    ],
+    answer: 2,
+    explanation: "L'erreur classique : <code>L.append(n)</code> ajoute toujours la même valeur (l'argument <code>n</code>) au lieu d'ajouter le terme courant <code>u</code>. Il faut écrire <code>L.append(u)</code>."
+  },
+  {
+    section: "Bloc B — Vers le Bac",
+    type: "code-output",
+    text: "Combien d'éléments contient la liste renvoyée par liste_termes(10) ? (réponds par un nombre)",
+    code: "def liste_termes(n):\n    L = []\n    u = 1\n    for i in range(n):\n        L.append(u)\n        u = u + 2\n    return L\n\nliste_termes(10)",
+    answer: ["10"],
+    explanation: "La boucle <code>for i in range(10)</code> tourne 10 fois, donc on fait 10 fois <code>L.append(u)</code>. La liste contient 10 éléments : <code>[1, 3, 5, 7, 9, 11, 13, 15, 17, 19]</code>."
+  },
+  {
+    section: "Bloc B — Vers le Bac",
+    type: "qcm",
+    text: "On veut écrire une fonction qui renvoie le seuil : le plus petit entier n tel que u_n ≥ 1000, où u₀ = 2 et u_{n+1} = 1.5 × u_n. Quelle structure est correcte ?",
+    options: [
+      "Une boucle <code>for i in range(1000)</code>",
+      "Une boucle <code>while u &lt; 1000</code> avec un compteur",
+      "Une boucle <code>if u &gt;= 1000</code>",
+      "Pas besoin de boucle, on calcule directement"
+    ],
+    answer: 1,
+    explanation: "On ne connaît pas à l'avance combien d'itérations sont nécessaires : il faut donc une boucle <code>while</code>. On incrémente un compteur <code>n</code> tant que la condition n'est pas atteinte."
+  },
+  {
+    section: "Bloc B — Vers le Bac",
+    type: "code-output",
+    text: "Que renvoie seuil() ? (réponds par un entier)",
+    code: "def seuil():\n    u = 2\n    n = 0\n    while u < 20:\n        u = u + 3\n        n = n + 1\n    return n\n\nseuil()",
+    answer: ["6"],
+    explanation: "On calcule : u=2, puis 5, 8, 11, 14, 17, 20. Au septième tour, u=20 et la condition <code>u &lt; 20</code> devient fausse. On a fait 6 incréments de n, donc la fonction renvoie <code>6</code>."
+  },
+  {
+    section: "Bloc B — Vers le Bac",
+    type: "qcm",
+    text: "Quelle est la <strong>bonne</strong> façon d'utiliser une fonction définie avec <code>def</code> et <code>return</code> dans la console Capytale ?",
+    options: [
+      "print(ma_fonction(5))",
+      "ma_fonction(5)",
+      "return ma_fonction(5)",
+      "def ma_fonction(5)"
+    ],
+    answer: 1,
+    explanation: "Dans Capytale (et toute console interactive Python), il suffit d'écrire <code>ma_fonction(5)</code>. Le résultat s'affiche automatiquement. Le <code>print</code> est superflu et alourdit le code."
+  }
+];
+
+let currentIndex = 0;
+let userAnswers = []; // {selected, correct, userText}
+let lastSection = null;
+
+function render() {
+  const q = questions[currentIndex];
+  const card = document.getElementById('question-card');
+
+  // Section divider
+  let sectionHtml = "";
+  if (q.section !== lastSection) {
+    sectionHtml = `<div class="question-meta">${q.section}</div>`;
+    lastSection = q.section;
+  } else {
+    sectionHtml = `<div class="question-meta">Question ${currentIndex + 1}</div>`;
+  }
+
+  let bodyHtml = `
+    ${sectionHtml}
+    <p class="question-text">${q.text}</p>
+  `;
+
+  if (q.code) {
+    bodyHtml += `<pre class="code-block">${escapeHtml(q.code)}</pre>`;
+  }
+
+  if (q.type === "qcm") {
+    bodyHtml += `<div class="options" id="options">`;
+    q.options.forEach((opt, i) => {
+      bodyHtml += `
+        <label class="option" data-index="${i}">
+          <input type="radio" name="answer" value="${i}">
+          <span class="option-label">${opt}</span>
+        </label>
+      `;
+    });
+    bodyHtml += `</div>`;
+  } else if (q.type === "code-output") {
+    bodyHtml += `<input type="text" id="text-answer" placeholder="Ta réponse..." autocomplete="off">`;
+  }
+
+  bodyHtml += `<div class="feedback" id="feedback"></div>`;
+  bodyHtml += `
+    <div class="actions">
+      <span style="font-size: 13px; color: var(--muted);" id="progress-detail"></span>
+      <div style="display: flex; gap: 10px;">
+        <button id="validate-btn">Valider</button>
+        <button id="next-btn" class="secondary hidden">Suivant →</button>
+      </div>
+    </div>
+  `;
+
+  card.innerHTML = bodyHtml;
+
+  // Progress
+  document.getElementById('progress-text').textContent = `Question ${currentIndex + 1} / ${questions.length}`;
+  document.getElementById('progress-fill').style.width = `${((currentIndex + 1) / questions.length) * 100}%`;
+
+  // Listeners
+  if (q.type === "qcm") {
+    document.querySelectorAll('.option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+        opt.querySelector('input').checked = true;
+      });
+    });
+  } else if (q.type === "code-output") {
+    const input = document.getElementById('text-answer');
+    input.focus();
+    input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        document.getElementById('validate-btn').click();
+      }
+    });
+  }
+
+  document.getElementById('validate-btn').addEventListener('click', validate);
+  document.getElementById('next-btn').addEventListener('click', next);
+}
+
+function validate() {
+  const q = questions[currentIndex];
+  const feedback = document.getElementById('feedback');
+  const validateBtn = document.getElementById('validate-btn');
+  const nextBtn = document.getElementById('next-btn');
+  let isCorrect = false;
+  let userResponse = null;
+
+  if (q.type === "qcm") {
+    const checked = document.querySelector('input[name="answer"]:checked');
+    if (!checked) {
+      feedback.className = "feedback incorrect";
+      feedback.style.display = "block";
+      feedback.innerHTML = "<strong>⚠ Sélectionne une réponse</strong>";
+      return;
+    }
+    const selectedIdx = parseInt(checked.value);
+    userResponse = selectedIdx;
+    isCorrect = (selectedIdx === q.answer);
+
+    document.querySelectorAll('.option').forEach((opt, i) => {
+      opt.classList.add('disabled');
+      opt.classList.remove('selected');
+      opt.querySelector('input').disabled = true;
+      if (i === q.answer) opt.classList.add('correct');
+      if (i === selectedIdx && !isCorrect) opt.classList.add('incorrect');
+    });
+  } else if (q.type === "code-output") {
+    const input = document.getElementById('text-answer');
+    const userText = input.value.trim();
+    userResponse = userText;
+    if (userText === "") {
+      feedback.className = "feedback incorrect";
+      feedback.style.display = "block";
+      feedback.innerHTML = "<strong>⚠ Saisis une réponse</strong>";
+      return;
+    }
+    // Comparaison normalisée (insensible à la casse pour les mots, exacte pour les nombres)
+    const normalized = userText.toLowerCase().replace(/\s+/g, '');
+    isCorrect = q.answer.some(a => a.toLowerCase().replace(/\s+/g, '') === normalized);
+    input.disabled = true;
+    input.classList.add(isCorrect ? "correct" : "incorrect");
+  }
+
+  userAnswers.push({
+    question: q,
+    correct: isCorrect,
+    userResponse: userResponse
+  });
+
+  feedback.className = "feedback " + (isCorrect ? "correct" : "incorrect");
+  feedback.style.display = "block";
+  if (isCorrect) {
+    feedback.innerHTML = `<strong>✓ Correct</strong>${q.explanation}`;
+  } else {
+    let correctAnswer;
+    if (q.type === "qcm") {
+      correctAnswer = q.options[q.answer];
+    } else {
+      correctAnswer = q.answer[0];
+    }
+    feedback.innerHTML = `<strong>✗ Incorrect</strong>La bonne réponse est : <code>${correctAnswer}</code><br><br>${q.explanation}`;
+  }
+
+  validateBtn.classList.add('hidden');
+  nextBtn.classList.remove('hidden');
+
+  if (currentIndex === questions.length - 1) {
+    nextBtn.textContent = "Voir mes résultats →";
+  }
+}
+
+function next() {
+  currentIndex++;
+  if (currentIndex >= questions.length) {
+    showResults();
+  } else {
+    render();
+  }
+}
+
+function showResults() {
+  document.getElementById('quiz-area').classList.add('hidden');
+  const resultArea = document.getElementById('result-area');
+  resultArea.classList.remove('hidden');
+
+  const score = userAnswers.filter(a => a.correct).length;
+  const total = questions.length;
+  const pct = Math.round((score / total) * 100);
+
+  let comment;
+  if (pct >= 90) comment = "Excellent ! Vous maîtrisez très bien les notions des deux TP.";
+  else if (pct >= 70) comment = "Bien. Quelques détails à revoir, mais les bases sont solides.";
+  else if (pct >= 50) comment = "Moyen. Reprenez les exercices des TP, en particulier ceux où vous avez fait des erreurs.";
+  else comment = "Il faut sérieusement reprendre les TP 1 et 2 avant lundi. Revoyez les corrections ci-dessous.";
+
+  let reviewHtml = "";
+  userAnswers.forEach((a, i) => {
+    const q = a.question;
+    let userResponseText;
+    let correctResponseText;
+    if (q.type === "qcm") {
+      userResponseText = q.options[a.userResponse];
+      correctResponseText = q.options[q.answer];
+    } else {
+      userResponseText = a.userResponse || "(vide)";
+      correctResponseText = q.answer[0];
+    }
+    reviewHtml += `
+      <div class="review-item">
+        <div class="review-q">
+          <span class="review-status ${a.correct ? 'ok' : 'ko'}">${a.correct ? '✓' : '✗'} Q${i + 1}</span>
+          ${q.text}
+        </div>
+        ${q.code ? `<pre class="code-block" style="margin-top: 8px;">${escapeHtml(q.code)}</pre>` : ''}
+        <div class="review-explanation">
+          ${a.correct ? '' : `Ta réponse : <code>${escapeHtml(String(userResponseText))}</code> · Bonne réponse : <code>${escapeHtml(String(correctResponseText))}</code><br>`}
+          ${q.explanation}
+        </div>
+      </div>
+    `;
+  });
+
+  resultArea.innerHTML = `
+    <div class="card score-card">
+      <p class="score-label">Score final</p>
+      <div class="score-value">${score} / ${total}</div>
+      <p class="score-label">${pct} %</p>
+      <p class="score-comment">${comment}</p>
+      <button onclick="restart()">Recommencer le QCM</button>
+    </div>
+    <div class="card">
+      <h2 style="margin: 0 0 12px; font-size: 18px;">Correction détaillée</h2>
+      <div class="review-section">${reviewHtml}</div>
+    </div>
+  `;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function restart() {
+  currentIndex = 0;
+  userAnswers = [];
+  lastSection = null;
+  document.getElementById('quiz-area').classList.remove('hidden');
+  document.getElementById('result-area').classList.add('hidden');
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+render();
+</script>
+</body>
+</html>
